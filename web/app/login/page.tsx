@@ -66,7 +66,11 @@ export default function LoginPage() {
       <section className="login-container">
         <div className="login-card">
           <div className="login-brand">
-            <div className="brand-icon">Q</div>
+            <img
+              src="/quickserve-logo.png"
+              alt="QuickServe"
+              className="login-logo"
+            />
 
             <div>
               <h1>QuickServe</h1>

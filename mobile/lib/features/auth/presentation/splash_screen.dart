@@ -5,17 +5,18 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'QuickServe',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            Image.asset(
+              'assets/images/quickserve_logo.png',
+              width: 220,
+              fit: BoxFit.contain,
             ),
-            SizedBox(height: 16),
-            CircularProgressIndicator(),
+            const SizedBox(height: 24),
+            const CircularProgressIndicator(),
           ],
         ),
       ),
