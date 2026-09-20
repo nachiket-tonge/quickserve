@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -90,9 +89,7 @@ export default function RequestsPage() {
     null,
   );
 
-  const [historyLoadingId, setHistoryLoadingId] = useState<string | null>(
-    null,
-  );
+  const [historyLoadingId, setHistoryLoadingId] = useState<string | null>(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -263,9 +260,7 @@ export default function RequestsPage() {
       const matchesSearch =
         !normalizedSearch ||
         request.request_number.toLowerCase().includes(normalizedSearch) ||
-        (customer?.full_name ?? "")
-          .toLowerCase()
-          .includes(normalizedSearch) ||
+        (customer?.full_name ?? "").toLowerCase().includes(normalizedSearch) ||
         (customer?.phone ?? "").toLowerCase().includes(normalizedSearch) ||
         (request.address ?? "").toLowerCase().includes(normalizedSearch) ||
         (service?.name ?? "").toLowerCase().includes(normalizedSearch) ||
@@ -276,8 +271,7 @@ export default function RequestsPage() {
 
       const matchesPriority =
         priorityFilter === "ALL" ||
-        (request.priority ?? "").toLowerCase() ===
-          priorityFilter.toLowerCase();
+        (request.priority ?? "").toLowerCase() === priorityFilter.toLowerCase();
 
       return matchesSearch && matchesStatus && matchesPriority;
     });
@@ -332,6 +326,15 @@ export default function RequestsPage() {
     setError("");
     setSuccess("");
 
+    /*
+     * ---------------------------------------------------------
+     * Step 1: Assign the request.
+     *
+     * The database remains the authority for the assignment
+     * and NEW → ASSIGNED transition.
+     * ---------------------------------------------------------
+     */
+
     const { data, error: updateError } = await supabase
       .from("service_requests")
       .update({
@@ -342,11 +345,11 @@ export default function RequestsPage() {
       .eq("status", "NEW")
       .select(
         `
-          id,
-          request_number,
-          agent_id,
-          status
-        `,
+        id,
+        request_number,
+        agent_id,
+        status
+      `,
       )
       .maybeSingle();
 
@@ -366,11 +369,62 @@ export default function RequestsPage() {
       return;
     }
 
-    setSuccess(
-      `${request.request_number} assigned to ${
-        selectedAgent.full_name ?? "selected agent"
-      }.`,
-    );
+    /*
+     * ---------------------------------------------------------
+     * Step 2: Assignment succeeded.
+     *
+     * Now request a push notification for the assigned agent.
+     *
+     * A notification failure must NOT undo a successful
+     * request assignment.
+     * ---------------------------------------------------------
+     */
+
+    let notificationWarning = "";
+
+    try {
+      const notificationResponse = await supabase.functions.invoke(
+        "send-push-notification",
+        {
+          body: {
+            event: "REQUEST_ASSIGNED",
+            request_id: request.id,
+          },
+        },
+      );
+
+      if (notificationResponse.error) {
+        notificationWarning =
+          " Assignment succeeded, but the agent notification could not be sent.";
+
+        console.error("Agent notification error:", notificationResponse.error);
+      }
+    } catch (notificationError) {
+      console.error("Agent assignment notification failed:", notificationError);
+
+      notificationWarning =
+        " Assignment succeeded, but the agent notification could not be sent.";
+    }
+
+    /*
+     * ---------------------------------------------------------
+     * Step 3: Update UI.
+     * ---------------------------------------------------------
+     */
+
+    if (notificationWarning) {
+      setSuccess(
+        `${request.request_number} assigned to ${
+          selectedAgent.full_name ?? "selected agent"
+        }.${notificationWarning}`,
+      );
+    } else {
+      setSuccess(
+        `${request.request_number} assigned to ${
+          selectedAgent.full_name ?? "selected agent"
+        }. Agent notification sent.`,
+      );
+    }
 
     setSelectedAgents((current) => {
       const updated = { ...current };
@@ -383,10 +437,7 @@ export default function RequestsPage() {
     await loadPage();
   }
 
-  async function updateRequestStatus(
-    request: Request,
-    newStatus: string,
-  ) {
+  async function updateRequestStatus(request: Request, newStatus: string) {
     if (request.status === newStatus) {
       return;
     }

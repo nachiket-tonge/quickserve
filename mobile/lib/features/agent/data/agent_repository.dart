@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../requests/models/service_request_model.dart';
 import '../models/request_note_model.dart';
+import 'package:flutter/foundation.dart';
 
 class AgentRepository {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -86,7 +87,50 @@ class AgentRepository {
         .select(_requestSelect)
         .single();
 
-    return ServiceRequestModel.fromMap(Map<String, dynamic>.from(response));
+    final updatedRequest = ServiceRequestModel.fromMap(
+      Map<String, dynamic>.from(response),
+    );
+
+    /*
+   * Push notifications are sent only after the database
+   * status update succeeds.
+   *
+   * Notification failure must not make a successful
+   * request-status update fail.
+   */
+    String? notificationEvent;
+
+    if (newStatus == 'IN_PROGRESS') {
+      notificationEvent = 'REQUEST_IN_PROGRESS';
+    } else if (newStatus == 'COMPLETED') {
+      notificationEvent = 'REQUEST_COMPLETED';
+    }
+
+    if (notificationEvent != null) {
+      try {
+        final notificationResponse = await _supabase.functions.invoke(
+          'send-push-notification',
+          body: {'event': notificationEvent, 'request_id': updatedRequest.id},
+        );
+
+        if (notificationResponse.status < 200 ||
+            notificationResponse.status >= 300) {
+          debugPrint(
+            'Push notification failed: '
+            '${notificationResponse.data}',
+          );
+        } else {
+          debugPrint(
+            'Push notification sent successfully: '
+            '$notificationEvent',
+          );
+        }
+      } catch (error) {
+        debugPrint('Push notification error: $error');
+      }
+    }
+
+    return updatedRequest;
   }
 
   /// Returns all notes belonging to a request.

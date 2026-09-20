@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "838888207729",
+    "project_id": "quickserve-194d8",
+    "storage_bucket": "quickserve-194d8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838888207729:android:c5e3fc8e02776b65b7b2d0",
+        "android_client_info": {
+          "package_name": "com.example.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu79-KAL642btKzTyLq8rnoFaUY2XXmMc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
