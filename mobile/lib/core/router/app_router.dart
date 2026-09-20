@@ -15,6 +15,9 @@ import '../../features/requests/presentation/create_request_screen.dart';
 import '../../features/requests/presentation/my_requests_screen.dart';
 import '../../features/requests/presentation/request_details_screen.dart';
 import '../../features/auth/presentation/profile_screen.dart';
+import '../../features/agent/presentation/agent_home_screen.dart';
+import '../../features/agent/presentation/agent_requests_screen.dart';
+import '../../features/agent/presentation/agent_request_details_screen.dart';
 final ProfileService _profileService = ProfileService();
 
 final GoRouter appRouter = GoRouter(
@@ -87,8 +90,25 @@ final GoRouter appRouter = GoRouter(
 
     GoRoute(
       path: '/agent',
-      builder: (context, state) =>
-          const PlaceholderPage(title: 'Agent Dashboard'),
+      builder: (context, state) => const AgentHomeScreen(),
+      routes: [
+        GoRoute(
+          path: 'requests',
+          builder: (context, state) => const AgentRequestsScreen(),
+        ),
+        GoRoute(
+          path: 'requests/:id',
+          builder: (context, state) {
+            final requestId = state.pathParameters['id'];
+
+            if (requestId == null || requestId.isEmpty) {
+              return const PlaceholderPage(title: 'Invalid Request');
+            }
+
+            return AgentRequestDetailsScreen(requestId: requestId);
+          },
+        ),
+      ],
     ),
 
     GoRoute(
