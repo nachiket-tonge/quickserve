@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../auth/data/profile_service.dart';
 
-
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
 
@@ -16,7 +15,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   String? _fullName;
   bool _isLoading = true;
-  bool _isSendingTestNotification = false;
 
   @override
   void initState() {
@@ -40,36 +38,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       setState(() {
         _isLoading = false;
       });
-    }
-  }
-
-  Future<void> _sendTestNotification() async {
-    if (_isSendingTestNotification) return;
-
-    setState(() {
-      _isSendingTestNotification = true;
-    });
-
-    try {
-     
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Test notification sent successfully.')),
-      );
-    } catch (error) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send notification: $error')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSendingTestNotification = false;
-        });
-      }
     }
   }
 
@@ -149,27 +117,6 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               ),
 
               const SizedBox(height: 32),
-
-              // TEMPORARY FCM TEST BUTTON
-              OutlinedButton.icon(
-                onPressed: _isSendingTestNotification
-                    ? null
-                    : _sendTestNotification,
-                icon: _isSendingTestNotification
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.notifications_outlined),
-                label: Text(
-                  _isSendingTestNotification
-                      ? 'Sending...'
-                      : 'Test Push Notification',
-                ),
-              ),
-
-              const SizedBox(height: 16),
 
               OutlinedButton.icon(
                 onPressed: () {
