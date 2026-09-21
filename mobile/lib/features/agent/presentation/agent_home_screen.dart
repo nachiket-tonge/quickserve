@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../data/agent_repository.dart';
 import '../../requests/models/service_request_model.dart';
 import '../../auth/data/auth_service.dart';
+import '../../auth/data/profile_service.dart';
 
 class AgentHomeScreen extends StatefulWidget {
   const AgentHomeScreen({super.key});
@@ -15,17 +16,40 @@ class AgentHomeScreen extends StatefulWidget {
 class _AgentHomeScreenState extends State<AgentHomeScreen> {
   final AgentRepository _repository = AgentRepository();
   final AuthService _authService = AuthService();
+  final ProfileService _profileService = ProfileService();
 
   late Future<List<ServiceRequestModel>> _requestsFuture;
 
-  @override
+  String? _fullName;
+  bool _isLoadingProfile = true;
+
+ @override
   void initState() {
     super.initState();
     _loadRequests();
+    _loadProfile();
   }
 
   void _loadRequests() {
     _requestsFuture = _repository.getAssignedRequests();
+  }
+  Future<void> _loadProfile() async {
+    try {
+      final profile = await _profileService.getCurrentUserProfile();
+
+      if (!mounted) return;
+
+      setState(() {
+        _fullName = profile?['full_name'] as String?;
+        _isLoadingProfile = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingProfile = false;
+      });
+    }
   }
 
   Future<void> _refresh() async {
@@ -123,9 +147,14 @@ class _AgentHomeScreenState extends State<AgentHomeScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                const Text(
-                  'Welcome, Agent',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                Text(
+                  _isLoadingProfile
+                      ? 'Welcome'
+                      : 'Welcome${_fullName != null && _fullName!.trim().isNotEmpty ? ', ${_fullName!.trim()}' : ''}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
 
                 const SizedBox(height: 8),
