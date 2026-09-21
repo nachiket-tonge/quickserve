@@ -84,8 +84,7 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 </tr>
 <tr>
 <td align="center"><img src="docs/screenshots/agent/status-update.png" width="220"/><br/><sub>Start / Complete Work</sub></td>
-<td align="center"><img src="docs/screenshots/agent/add-note.png" width="220"/><br/><sub>Add Note</sub></td>
-<td align="center"><img src="docs/screenshots/agent/push-notification.png" width="220"/><br/><sub>Push Notification</sub></td>
+
 </tr>
 </table>
 
@@ -97,7 +96,7 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 <td align="center"><img src="docs/screenshots/admin/requests.png" width="280"/><br/><sub>Request Management</sub></td>
 </tr>
 <tr>
-<td align="center"><img src="docs/screenshots/admin/agents.png" width="280"/><br/><sub>Agent Management</sub></td>
+
 <td align="center"><img src="docs/screenshots/admin/create-agent.png" width="280"/><br/><sub>Create Agent</sub></td>
 </tr>
 <tr>
