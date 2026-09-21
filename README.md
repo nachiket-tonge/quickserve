@@ -6,9 +6,12 @@
 <p align="center"><em>Your Home. Our Help. Faster.</em></p>
 
 <p align="center">
-  A multi-role, database-secured service-request platform built for the SWASIQ Technology
-  internship technical assignment — Customer mobile app, Agent mobile app, and Admin web
-  portal, all running on a single Supabase backend.
+  A multi-role, database-secured service-request platform — a single mobile app shared by
+  Customers and Agents, plus an Admin web portal, all running on one Supabase backend.
+</p>
+
+<p align="center">
+  <a href="https://quickserve-green-chi.vercel.app/"><strong>🌐 Live Admin Portal</strong></a>
 </p>
 
 ---
@@ -16,41 +19,63 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Screenshots](#screenshots)
-3. [Why This Architecture](#why-this-architecture)
-4. [Tech Stack](#tech-stack)
-5. [System Architecture](#system-architecture)
-6. [Repository Structure](#repository-structure)
-7. [Features by Role](#features-by-role)
-8. [Request Lifecycle](#request-lifecycle)
-9. [Getting Started](#getting-started)
-10. [Environment Variables](#environment-variables)
-11. [Documentation Index](#documentation-index)
-12. [Known Limitations](#known-limitations)
-13. [Roadmap](#roadmap)
-14. [Credits](#credits)
+2. [Download & Live Demo](#download--live-demo)
+3. [Screenshots](#screenshots)
+4. [Why This Architecture](#why-this-architecture)
+5. [Tech Stack](#tech-stack)
+6. [System Architecture](#system-architecture)
+7. [Repository Structure](#repository-structure)
+8. [Features by Role](#features-by-role)
+9. [Request Lifecycle](#request-lifecycle)
+10. [Getting Started](#getting-started)
+11. [Environment Variables](#environment-variables)
+12. [Documentation Index](#documentation-index)
+13. [Known Limitations](#known-limitations)
+14. [Roadmap](#roadmap)
+15. [Credits](#credits)
 
 ---
 
 ## Overview
 
-QuickServe is a service-request management platform with three connected applications sharing
+QuickServe is a service-request management platform with two connected applications sharing
 one backend:
 
 | App | Platform | Used by |
 |---|---|---|
-| **Customer App** | Flutter (Android) | Customers requesting home services |
-| **Agent App** | Flutter (Android) | Field agents fulfilling assigned requests |
-| **Admin Portal** | Next.js (Web, deployed on Vercel) | Administrators managing the whole operation |
+| **QuickServe App** (single APK) | Flutter (Android) | Customers **and** Agents — one install, one app. After login, it automatically opens the Customer dashboard or the Agent dashboard depending on the account's role. |
+| **Admin Portal** | Next.js (Web) — [live at quickserve-green-chi.vercel.app](https://quickserve-green-chi.vercel.app/) | Administrators managing the whole operation |
 
 A customer creates a request for a service (AC repair, plumbing, electrical, cleaning). An
 admin reviews it, checks which agents are qualified for that service, and assigns one. The
 agent works the request through to completion. Every status change, every important record
 change, and every push notification is driven from the database layer — not the UI — so the
-system stays consistent and auditable no matter which app touched it.
+system stays consistent and auditable no matter which role touched it.
 
 The project deliberately treats **the database as the security boundary**, not the app code.
 See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
+
+---
+
+## Download & Live Demo
+
+### 📱 Get the App
+
+**[Download QuickServe APK](PASTE_YOUR_GOOGLE_DRIVE_LINK_HERE)**
+
+There is only **one APK** — it works for both customers and agents. Install it, sign in with
+your account, and the app automatically shows the right dashboard for your role:
+
+- Logging in with a **customer** account → Customer home (browse services, create/track requests)
+- Logging in with an **agent** account → Agent home (assigned requests, status updates, notes)
+
+No separate download is needed for agents.
+
+### 🌐 Try the Admin Portal
+
+The Admin Portal is already deployed and live — no setup required to explore it:
+
+**[https://quickserve-green-chi.vercel.app/](https://quickserve-green-chi.vercel.app/)**
 
 ---
 
@@ -59,7 +84,7 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 > Drop your screenshots into the matching folder under `docs/screenshots/` using the filenames
 > below, and every image in this README will render automatically — no other edits needed.
 
-### Customer App
+### Customer Dashboard
 
 <table>
 <tr>
@@ -74,7 +99,7 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 </tr>
 </table>
 
-### Agent App
+### Agent Dashboard
 
 <table>
 <tr>
@@ -84,7 +109,6 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 </tr>
 <tr>
 <td align="center"><img src="docs/screenshots/agent/status-update.png" width="220"/><br/><sub>Start / Complete Work</sub></td>
-
 </tr>
 </table>
 
@@ -96,7 +120,6 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 <td align="center"><img src="docs/screenshots/admin/requests.png" width="280"/><br/><sub>Request Management</sub></td>
 </tr>
 <tr>
-
 <td align="center"><img src="docs/screenshots/admin/create-agent.png" width="280"/><br/><sub>Create Agent</sub></td>
 </tr>
 <tr>
@@ -113,20 +136,23 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 
 ## Why This Architecture
 
-The assignment is graded on judgment, not feature count — specifically on security enforced at
-the data layer, a justifiable data model, meaningful audit/logging, and the ability to explain
+The project is built around judgment, not feature count — specifically around security enforced
+at the data layer, a justifiable data model, meaningful audit/logging, and the ability to explain
 every decision. That shaped three deliberate choices:
 
 - **Supabase over a hand-built backend.** QuickServe's data is strongly relational (a request
   belongs to a customer, is optionally assigned to an agent, references a service, and has a
   one-to-many history). Supabase gives managed PostgreSQL, Auth, and Row Level Security as one
   connected system, so no custom backend had to be written or deployed.
-- **RLS-first, not RLS-retrofitted.** Row Level Security policies were written on Day 1,
-  alongside the schema — before any UI existed — so authorization is structural, not patched on
-  afterward.
+- **RLS-first, not RLS-retrofitted.** Row Level Security policies were written alongside the
+  schema — before any UI existed — so authorization is structural, not patched on afterward.
 - **The database enforces the rules the UI merely displays.** Status transitions, ownership
   fields, audit records, and status history are all controlled by PostgreSQL functions and
   triggers, so a modified or bypassed client still cannot violate the business rules.
+- **One app, role-based routing.** Rather than building and maintaining two separate mobile
+  apps, Customer and Agent experiences live in a single Flutter codebase. After login, the app
+  reads the account's role from the database and routes to the correct home screen — simpler to
+  build, simpler to distribute, and there is exactly one APK to install.
 
 ---
 
@@ -134,7 +160,7 @@ every decision. That shaped three deliberate choices:
 
 | Layer | Technology |
 |---|---|
-| Customer & Agent Apps | Flutter 3.47.5, Dart 3.13.4 |
+| Mobile App (Customer + Agent, single APK) | Flutter 3.47.5, Dart 3.13.4 |
 | Mobile navigation | go_router |
 | Mobile state management | flutter_riverpod |
 | Mobile config | flutter_dotenv (Supabase URL/key via `--dart-define`, never committed) |
@@ -152,7 +178,7 @@ every decision. That shaped three deliberate choices:
 | Serverless push logic | Supabase Edge Functions (Deno/TypeScript) |
 | Web deployment | Vercel |
 | Backend & Edge Function deployment | Supabase |
-| Mobile distribution | Android release APK |
+| Mobile distribution | Single Android release APK (Customer + Agent) |
 
 There is no separate application backend (e.g. Spring Boot) in QuickServe — Supabase **is** the
 backend. Firebase is used exclusively for push delivery.
@@ -163,8 +189,7 @@ backend. Firebase is used exclusively for push delivery.
 
 ```mermaid
 graph TD
-    A[Customer App - Flutter] -->|Supabase SDK| S[(Supabase)]
-    B[Agent App - Flutter] -->|Supabase SDK| S
+    A[Mobile App - Flutter<br/>Customer + Agent, one APK] -->|Supabase SDK| S[(Supabase)]
     C[Admin Portal - Next.js] -->|supabase-js| S
 
     S --> AU[Auth]
@@ -173,17 +198,16 @@ graph TD
     S --> EF[Edge Functions]
 
     EF -->|Firebase Admin| FCM[Firebase Cloud Messaging]
-    FCM --> B
     FCM --> A
 
     C -->|Server-only: service-role key| API[Next.js API routes]
     API --> S
 ```
 
-**Security principle:** none of the three client apps is a trusted security boundary. Every one
-of them calls Supabase, but PostgreSQL RLS — not the Flutter widget tree and not a React
-component — decides which rows an authenticated identity may read or write. See
-[`docs/SECURITY.md`](docs/SECURITY.md).
+**Security principle:** none of the client apps is a trusted security boundary. Every one of
+them calls Supabase, but PostgreSQL RLS — not the Flutter widget tree and not a React
+component — decides which rows an authenticated identity may read or write, and which
+dashboard (customer vs. agent) a given login lands on. See [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ---
 
@@ -191,7 +215,7 @@ component — decides which rows an authenticated identity may read or write. Se
 
 ```
 quickserve/
-├── mobile/                        # Flutter — Customer & Agent apps (feature-first)
+├── mobile/                        # Flutter — single app, role-based routing
 │   ├── lib/
 │   │   ├── core/                  # supabase client, router, theme, config
 │   │   └── features/
@@ -233,6 +257,10 @@ quickserve/
 ---
 
 ## Features by Role
+
+> All Customer and Agent features below live in the **same installed app** — see
+> [Download & Live Demo](#download--live-demo) above. Which dashboard opens depends only on the
+> logged-in account's role.
 
 ### Customer
 
@@ -293,6 +321,12 @@ attempted it directly. Every transition also automatically writes a row to
 
 ## Getting Started
 
+The Admin Portal is already live at
+**[quickserve-green-chi.vercel.app](https://quickserve-green-chi.vercel.app/)** and the mobile
+app is available as a direct APK download (see [above](#download--live-demo)) — you don't need
+to set anything up locally just to try QuickServe. The steps below are for running the project
+from source.
+
 ### Prerequisites
 
 - Flutter 3.47.5 / Dart 3.13.4, with an Android emulator or device
@@ -317,7 +351,7 @@ npx supabase functions deploy send-push-notification
 npx supabase secrets set FIREBASE_SERVICE_ACCOUNT_B64=<base64-encoded-service-account-json>
 ```
 
-### 2. Mobile apps (Customer & Agent)
+### 2. Mobile app (Customer + Agent, one codebase)
 
 ```bash
 cd mobile
@@ -327,7 +361,7 @@ flutter run -d <device-id> \
   --dart-define=SUPABASE_PUBLISHABLE_KEY=<your-anon-key>
 ```
 
-Release build:
+Release build (this is the single APK distributed to both customers and agents):
 
 ```bash
 flutter clean && flutter pub get
@@ -343,7 +377,9 @@ cp .env.example .env.local   # fill in the values below
 npm run dev
 ```
 
-Deployed production build: Vercel (auto-deploy from `main`, or `vercel --prod`).
+Production build: deployed on Vercel at
+[quickserve-green-chi.vercel.app](https://quickserve-green-chi.vercel.app/)
+(auto-deploy from `main`, or `vercel --prod`).
 
 ---
 
@@ -370,7 +406,7 @@ the way it is.
 | [`docs/DATABASE.md`](docs/DATABASE.md) | Full schema, ER diagram, indexes, functions/triggers, RLS policies, request numbering |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System design, data flow, push-notification pipeline, agent-provisioning flow |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Authn vs authz, RLS policy reference, secrets architecture, what was tested |
-| `docs/BUILD_LOG.md` | Day-by-day decisions and problems solved (interview prep material) |
+| `docs/BUILD_LOG.md` | Day-by-day decisions and problems solved |
 
 ---
 
@@ -400,9 +436,9 @@ one open config issue:
 
 ## Credits
 
-Built by **Nachiket Tonge** as the technical assignment for the **SWASIQ Technology**
-internship.
+Built by **Nachiket Tonge**.
 
 - Repository: [`github.com/nachiket-tonge/quickserve`](https://github.com/nachiket-tonge/quickserve)
+- Live Admin Portal: [quickserve-green-chi.vercel.app](https://quickserve-green-chi.vercel.app/)
 - Backend: [Supabase](https://supabase.com)
 - Push delivery: [Firebase Cloud Messaging](https://firebase.google.com/products/cloud-messaging)
