@@ -61,7 +61,7 @@ See [`docs/SECURITY.md`](docs/SECURITY.md) for the full reasoning.
 
 ### 📱 Get the App
 
-**[Download QuickServe APK](PASTE_YOUR_GOOGLE_DRIVE_LINK_HERE)**
+**[Download QuickServe APK](https://drive.google.com/drive/folders/1lJ08FQKZDu44ajhrIgh2lkO1Bi4Puf9p?usp=drive_link)**
 
 There is only **one APK** — it works for both customers and agents. Install it, sign in with
 your account, and the app automatically shows the right dashboard for your role:
